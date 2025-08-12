@@ -36,7 +36,7 @@ index = VectorStoreIndex.from_documents(documents)
 app = FastAPI()
 
 # Note: GOOGLE_API_KEY environment variable is used automatically
-gemini_llm = GeminiMultiModal(model_name="models/gemini-1.5-pro-latest")
+gemini_llm = GeminiMultiModal(model="models/gemini-2.5-flash")
 
 # If you wish to use OpenAI use this model
 # openai_llm = OpenAIMultiModal(model="gpt-4o", max_new_tokens=1500)
@@ -74,6 +74,6 @@ async def analyse_diagram(prompt: str = Form(...), image_file: UploadFile = File
 
 
 # To run this:
-# 1. pip install "llama-index[multi_modal_llms-gemini,embeddings-gemini]" fastapi uvicorn python-dotenv python-multipart
+# 1. pip install llama-index-multi_modal_llms-gemini llama-index-embeddings-gemini fastapi uvicorn python-dotenv python-multipart
 # 2. Set your GOOGLE_API_KEY environment variable.
-# 3. Run the server: uvicorn llamaIndex:app --reload
+# 3. Run the server: navigate to the file folder ("cd .\hackaton\"), then run: uvicorn llamaIndex:app --reload
