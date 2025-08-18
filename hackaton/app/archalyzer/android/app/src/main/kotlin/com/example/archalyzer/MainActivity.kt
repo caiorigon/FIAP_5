@@ -1,4 +1,4 @@
-package com.example.archalyzer
+package com.rigon.archalyzer
 
 import io.flutter.embedding.android.FlutterActivity
 

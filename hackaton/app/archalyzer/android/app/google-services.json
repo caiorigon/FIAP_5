@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "746786174247",
+    "project_id": "archalyzer-5b35c",
+    "storage_bucket": "archalyzer-5b35c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746786174247:android:a7346422b5a4142c4ae502",
+        "android_client_info": {
+          "package_name": "com.rigon.archalyzer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNRsdzWLgJuOs6_hx0zr9agQCBkJyjU0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
