@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 
 # LlamaIndex Imports
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
-from llama_index.multi_modal_llms.gemini import GeminiMultiModal
-from llama_index.embeddings.gemini import GeminiEmbedding
+from llama_index.llms.google_genai import GoogleGenAI
+from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 
 load_dotenv()
 # --- Configure LlamaIndex Settings to use Gemini ---
-Settings.llm = GeminiMultiModal(model_name="models/gemini-1.5-pro-latest")
-Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004")
+Settings.llm = GoogleGenAI(model_name="models/gemini-1.5-pro-latest")
+Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004")
 
 # --- Setup: This part would run once when your server starts ---
 # Create a dummy knowledge base for our rules
@@ -35,9 +35,6 @@ index = VectorStoreIndex.from_documents(documents)
 
 app = FastAPI()
 
-# Note: GOOGLE_API_KEY environment variable is used automatically
-gemini_llm = GeminiMultiModal(model="models/gemini-2.5-flash")
-
 # If you wish to use OpenAI use this model
 # openai_llm = OpenAIMultiModal(model="gpt-4o", max_new_tokens=1500)
 
@@ -55,13 +52,14 @@ async def analyse_diagram(prompt: str = Form(...), image_file: UploadFile = File
             f.write(await image_file.read())
 
         # The core of LlamaIndex RAG: create a query engine
-        query_engine = index.as_query_engine(llm=gemini_llm)
+        query_engine = index.as_query_engine(llm=Settings.llm)
         # For OpenAI use this code
         # query_engine = index.as_query_engine(llm=openai_llm)
 
         # Query with both the image and text. LlamaIndex handles the rest.
         response = query_engine.query(
-            f"{prompt}. Use the context provided to find specific rule violations."
+            f"""{prompt}. Use the context provided to find specific rule violations.
+            Return the result in a json format containing a title for the diagram and the violations"""
         )
 
         # Clean up the temp image
