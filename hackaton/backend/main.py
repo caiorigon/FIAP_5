@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 import json
 from PIL import Image, ImageDraw
@@ -15,17 +16,33 @@ client = OpenAI()
 # )
 app = FastAPI()
 
+security = HTTPBearer()
 
-@app.post("/analyse-diagram")
-async def analyse_diagram(image: UploadFile = File(...)):
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    if token != os.getenv("API_AUTH_TOKEN"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing token",
+        )
+
+
+@app.post("/analyze-diagram")
+async def analyze_diagram(
+    image: UploadFile = File(...),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """
     Receives a diagram and a prompt, uses RAG to find potencial STRIDE problems in the architecture based on our internal knowledge base.
     """
+    verify_token(credentials)
+
     try:
         image_bytes = await image.read()
 
         prompt = """
-Analyse this cloud software architecture diagram and identify what is it doing, what cloud it is in and the main components of this image.
+analyze this cloud software architecture diagram and identify what is it doing, what cloud it is in and the main components of this image.
 Make a full STRIDE analysis of the architecture, identifying potential security threats.
 A list of main components in the architecture, with the coordinates of the bounding box of the components in the image and the threats: A list of potential security threats identified in the architecture, with the description, threat_level, and possible mitigation.
 
