@@ -1,68 +1,95 @@
 import 'package:archalyzer/app/controllers/analysis_controller.dart';
-import 'package:archalyzer/app/views/analysis_list/analysis_list_page.dart';
+import 'package:archalyzer/app/views/analysis_detail/analysis_detail_page.dart';
+import 'package:archalyzer/app/views/home/loading_dialog.dart';
+import 'package:archalyzer/app/views/home/main_button.dart';
+import 'package:archalyzer/app/views/home/main_title.dart';
+import 'package:archalyzer/app/views/home/past_analyses_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Watch for changes in the controller's state
-    final controller = context.watch<AnalysisController>();
+  State<HomePage> createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<AnalysisController>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Archalyzer"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list_alt),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const AnalysisListPage()));
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // If it's loading, show a spinner, otherwise show the buttons
-            if (controller.isLoading)
-              const CircularProgressIndicator()
-            else
-              Column(
+      appBar: AppBar(title: MainTitle(), actions: [PastAnalysesButton()]),
+      body: SafeArea(
+        child: Consumer<AnalysisController>(
+          builder: (context, analysisController, _) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 26),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.upload_file),
-                    label: const Text("Upload Diagram"),
-                    onPressed: () {
-                      // Use context.read inside callbacks to call functions
-                      context.read<AnalysisController>().createNewAnalysis(fromCamera: false);
+                  Text(
+                    "Analyze your diagram",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Upload or capture a cloud architecture diagram to identify potential STRIDE threats",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(),
+                  ),
+                  SizedBox(height: 36),
+                  MainButton(
+                    title: "take Picture",
+                    description: "Capture a diagram with your camera",
+                    icon: Icons.camera_alt_outlined,
+                    iconColor: Colors.blue[800],
+                    iconBgColor: Colors.blue[50],
+                    onPressed: () async {
+                      await analysisController.createNewAnalysis(
+                        fromCamera: true,
+                      );
+                      if (controller.actualAnalysis != null &&
+                          context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AnalysisDetailPage(),
+                          ),
+                        );
+                      }
                     },
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.camera_alt),
-                    label: const Text("Take Picture"),
-                    onPressed: () {
-                      context.read<AnalysisController>().createNewAnalysis(fromCamera: true);
+                  SizedBox(height: 8),
+                  MainButton(
+                    title: "Upload picture",
+                    description: "Select an image from your device",
+                    icon: Icons.upload,
+                    iconColor: Colors.green[800],
+                    iconBgColor: Colors.green[50],
+                    onPressed: () async {
+                      LoadingDialog.show(context);
+                      await analysisController.createNewAnalysis(
+                        fromCamera: false,
+                      );
+                      LoadingDialog.hide(context);
+                      if (controller.actualAnalysis != null &&
+                          context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AnalysisDetailPage(),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],
               ),
-            
-            // If there's an error, display it
-            if (controller.errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  controller.errorMessage!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-          ],
+            );
+          },
         ),
       ),
     );

@@ -12,9 +12,9 @@ void setupLocator() {
   // Register services as singletons. They are created once and the same
   // instance is provided every time.
   locator.registerLazySingleton(() => AuthService());
-  
+
   // The ApiService depends on AuthService. GetIt will resolve this for you.
-  locator.registerLazySingleton(() => ApiService(authService: locator<AuthService>()));
+  locator.registerLazySingleton(() => ApiService());
 
   // --- CONTROLLERS / NOTIFIERS ---
   // Register controllers as a 'factory'. This means a new instance

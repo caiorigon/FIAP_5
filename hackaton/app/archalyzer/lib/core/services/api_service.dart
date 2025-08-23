@@ -1,38 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import '../../app/models/analysis_result.dart'; // Your model
-import 'auth_service.dart'; // Your existing AuthService
 
 class ApiService {
-  final AuthService _authService;
   // Replace with your actual Cloud Run URL
-  final String _baseUrl = "https://archalyzer-backend-xyz-uc.a.run.app"; 
+  final _baseUri = dotenv.env['BASE_URI'];
+  final authToken = dotenv.env['AUTH_TOKEN'];
 
   // We provide the AuthService when we create an ApiService
-  ApiService({required AuthService authService}) : _authService = authService;
+  ApiService();
 
   Future<AnalysisResult> analyzeDiagram(File imageFile) async {
-    // 1. Get the authentication token
-    final token = await _authService.getAuthToken();
-    if (token == null) {
-      throw Exception("Authentication failed. Could not get token.");
-    }
-
-    // 2. Create the multipart request
-    final uri = Uri.parse("$_baseUrl/analyse-diagram");
+    final uri = Uri.parse("$_baseUri/analyze-diagram");
     final request = http.MultipartRequest("POST", uri)
-      ..headers['Authorization'] = 'Bearer $token'
-      ..files.add(
-        await http.MultipartFile.fromPath(
-          'file', // This 'file' key must match your FastAPI backend
-          imageFile.path,
-        ),
-      );
+      ..headers['Authorization'] = 'Bearer $authToken'
+      ..files.add(await http.MultipartFile.fromPath('image', imageFile.path))
+      ..fields['prompt'] = "Find security issues in this diagram image.";
 
-    // 3. Send the request and handle the response
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
 
@@ -40,26 +28,13 @@ class ApiService {
       // The backend should return the JSON for the analysis
       // and the URL for the analyzed image.
       final responseBody = json.decode(response.body);
-      
-      // TODO: Here you would download the analyzed image from the URL
-      // provided in the response and save it locally.
-      // For now, we'll just use the original image path as a placeholder.
-      return AnalysisResult(
-        id: responseBody['id'] ?? DateTime.now().toIso8601String(),
-        title: responseBody['title'],
-        originalImagePath: imageFile.path,
-        analyzedImagePath: imageFile.path, // Placeholder
-        createdAt: DateTime.now(),
-        components: (responseBody['components'] as List)
-            .map((compJson) => AnalyzedComponent(
-                  componentName: compJson['component_name'],
-                  risks: List<String>.from(compJson['risks']),
-                  securityAnalysis: compJson['security_analysis'],
-                ))
-            .toList(),
-      );
+
+      print('Backend Responded');
+      return AnalysisResult.fromJson(responseBody);
     } else {
-      throw Exception("Failed to analyze diagram. Status code: ${response.statusCode}, Body: ${response.body}");
+      throw Exception(
+        "Failed to analyze diagram. Status code: ${response.statusCode}, Body: ${response.body}",
+      );
     }
   }
 }

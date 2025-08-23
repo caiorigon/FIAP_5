@@ -1,64 +1,105 @@
 import 'dart:convert';
 
+import 'package:archalyzer/app/models/threat_level.dart';
+import 'package:uuid/uuid.dart';
+
 // Helper function to decode JSON easily
-AnalysisResult analysisResultFromJson(String str) => AnalysisResult.fromJson(json.decode(str));
+AnalysisResult analysisResultFromJson(String str) =>
+    AnalysisResult.fromJson(json.decode(str));
 
 class AnalysisResult {
-    final String id;
-    final String title;
-    final String originalImagePath; // Local path to the user's image
-    final String analyzedImagePath; // Local path to the image from the backend
-    final DateTime createdAt;
-    final List<AnalyzedComponent> components;
+  final String id;
+  final String title;
+  final String cloud;
+  final String description;
+  final String? originalImagePath; // Local path to the user's image
+  final String? analyzedImagePath; // Local path to the image from the backend
+  final DateTime createdAt;
+  final List<AnalyzedComponent>? components;
 
-    AnalysisResult({
-        required this.id,
-        required this.title,
-        required this.originalImagePath,
-        required this.analyzedImagePath,
-        required this.createdAt,
-        required this.components,
-    });
+  AnalysisResult({
+    required this.id,
+    required this.title,
+    required this.cloud,
+    required this.description,
+    required this.originalImagePath,
+    required this.analyzedImagePath,
+    required this.createdAt,
+    required this.components,
+  });
 
-    factory AnalysisResult.fromJson(Map<String, dynamic> json) => AnalysisResult(
-        id: json["id"] ?? DateTime.now().toIso8601String(), // Generate an ID if backend doesn't provide one
-        title: json["title"],
-        originalImagePath: json["originalImagePath"],
-        analyzedImagePath: json["analyzedImagePath"],
-        createdAt: json["createdAt"] != null ? DateTime.parse(json["createdAt"]) : DateTime.now(),
-        components: List<AnalyzedComponent>.from(json["components"].map((x) => AnalyzedComponent.fromJson(x))),
-    );
+  factory AnalysisResult.fromJson(Map<String, dynamic> json) => AnalysisResult(
+    id: json["id"] ?? const Uuid().v4(),
+    title: json["title"],
+    cloud: json["cloud"],
+    description: json["description"],
+    originalImagePath: json["originalImagePath"],
+    analyzedImagePath: json["analyzedImagePath"],
+    createdAt: json["createdAt"] != null
+        ? DateTime.parse(json["createdAt"])
+        : DateTime.now(),
+    components: json["components"] != null
+        ? List<AnalyzedComponent>.from(
+            json["components"].map(
+              (component) => AnalyzedComponent.fromJson(component),
+            ),
+          )
+        : null,
+  );
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "title": title,
-        "originalImagePath": originalImagePath,
-        "analyzedImagePath": analyzedImagePath,
-        "createdAt": createdAt.toIso8601String(),
-        "components": List<dynamic>.from(components.map((x) => x.toJson())),
-    };
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "title": title,
+    "description": description,
+    "originalImagePath": originalImagePath,
+    "analyzedImagePath": analyzedImagePath,
+    "createdAt": createdAt.toIso8601String(),
+    "components": components != null
+        ? List<dynamic>.from(components!.map((x) => x.toJson()))
+        : null,
+  };
 }
 
 class AnalyzedComponent {
-    final String componentName;
-    final List<String> risks;
-    final String securityAnalysis;
+  final String componentName;
+  final Threat threat;
 
-    AnalyzedComponent({
-        required this.componentName,
-        required this.risks,
-        required this.securityAnalysis,
-    });
+  AnalyzedComponent({required this.componentName, required this.threat});
 
-    factory AnalyzedComponent.fromJson(Map<String, dynamic> json) => AnalyzedComponent(
-        componentName: json["componentName"],
-        risks: List<String>.from(json["risks"].map((x) => x)),
-        securityAnalysis: json["securityAnalysis"],
+  factory AnalyzedComponent.fromJson(Map<String, dynamic> json) =>
+      AnalyzedComponent(
+        componentName: json["name"],
+        threat: Threat.fromJson(json["threat"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+    "componentName": componentName,
+    "threat": threat.toJson(),
+  };
+}
+
+class Threat {
+  final String description;
+  final ThreatLevel threatLevel;
+  final String possibleMitigation;
+
+  Threat({
+    required this.description,
+    required this.threatLevel,
+    required this.possibleMitigation,
+  });
+
+  factory Threat.fromJson(Map<String, dynamic> json) {
+    return Threat(
+      description: json['description'] ?? '',
+      threatLevel: threatLevelFromString(json['threat_level'] ?? 'Unknown'),
+      possibleMitigation: json['possible_mitigation'] ?? 'No advice available',
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "componentName": componentName,
-        "risks": List<dynamic>.from(risks.map((x) => x)),
-        "securityAnalysis": securityAnalysis,
-    };
+  Map<String, dynamic> toJson() => {
+    "description": description,
+    "threat_level": threatLevelToString(threatLevel),
+    "possible_mitigation": possibleMitigation,
+  };
 }

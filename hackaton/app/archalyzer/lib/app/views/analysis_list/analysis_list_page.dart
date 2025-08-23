@@ -1,8 +1,10 @@
 import 'package:archalyzer/app/controllers/analysis_controller.dart';
+import 'package:archalyzer/app/views/analysis_detail/analysis_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 // TODO: Create the AnalysisDetailScreen file
-// import 'analysis_detail_screen.dart'; 
+// import 'analysis_detail_screen.dart';
 
 class AnalysisListPage extends StatelessWidget {
   const AnalysisListPage({super.key});
@@ -12,21 +14,36 @@ class AnalysisListPage extends StatelessWidget {
     final analyses = context.watch<AnalysisController>().analyses;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Past Analyses")),
+      appBar: AppBar(title: const Text("Past Analyses"), centerTitle: true),
       body: analyses.isEmpty
           ? const Center(child: Text("No analyses yet."))
-          : ListView.builder(
-              itemCount: analyses.length,
-              itemBuilder: (context, index) {
-                final analysis = analyses[index];
-                return ListTile(
-                  leading: const Icon(Icons.image), // Placeholder for a thumbnail
-                  title: Text(analysis.title),
-                  subtitle: Text(analysis.createdAt.toLocal().toString()),
-                  onTap: () {
-                    // TODO: Navigate to the AnalysisDetailScreen
-                    // Navigator.push(context, MaterialPageRoute(builder: (_) => AnalysisDetailScreen(analysis: analysis)));
-                    print("Tapped on ${analysis.title}");
+          : Consumer<AnalysisController>(
+              builder: (context, analysisController, _) {
+                return ListView.builder(
+                  itemCount: analyses.length,
+                  itemBuilder: (context, index) {
+                    final analysis = analyses[index];
+                    return ListTile(
+                      leading: const Icon(
+                        Icons.image,
+                      ), // Placeholder for a thumbnail
+                      title: Text(analysis.title),
+                      subtitle: Text(
+                        DateFormat(
+                          "dd/MM/yyyy - hh:mm:ss",
+                        ).format(analysis.createdAt.toLocal()),
+                      ),
+                      onTap: () {
+                        analysisController.actualAnalysis = analysis;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AnalysisDetailPage(),
+                          ),
+                        );
+                        print("Tapped on ${analysis.title}");
+                      },
+                    );
                   },
                 );
               },
