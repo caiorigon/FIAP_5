@@ -1,6 +1,5 @@
 import 'package:archalyzer/app/controllers/analysis_controller.dart';
 import 'package:archalyzer/app/views/analysis_detail/analysis_detail_page.dart';
-import 'package:archalyzer/app/views/home/loading_dialog.dart';
 import 'package:archalyzer/app/views/home/main_button.dart';
 import 'package:archalyzer/app/views/home/main_title.dart';
 import 'package:archalyzer/app/views/home/past_analyses_button.dart';
@@ -19,7 +18,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final controller = context.watch<AnalysisController>();
     return Scaffold(
-      appBar: AppBar(title: MainTitle(), actions: [PastAnalysesButton()]),
+      appBar: AppBar(
+        title: MainTitle(
+          title: "Archalyzer",
+          subtitle: "Cloud Security Threat Assesment",
+        ),
+        actions: [PastAnalysesButton()],
+      ),
       body: SafeArea(
         child: Consumer<AnalysisController>(
           builder: (context, analysisController, _) {
@@ -42,6 +47,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: 36),
                   MainButton(
+                    isEnabled: !controller.isLoading,
                     title: "take Picture",
                     description: "Capture a diagram with your camera",
                     icon: Icons.camera_alt_outlined,
@@ -64,17 +70,18 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: 8),
                   MainButton(
+                    isEnabled: !controller.isLoading,
                     title: "Upload picture",
                     description: "Select an image from your device",
                     icon: Icons.upload,
                     iconColor: Colors.green[800],
                     iconBgColor: Colors.green[50],
                     onPressed: () async {
-                      LoadingDialog.show(context);
+                      // LoadingDialog.show(context);
                       await analysisController.createNewAnalysis(
                         fromCamera: false,
                       );
-                      LoadingDialog.hide(context);
+                      // LoadingDialog.hide(context);
                       if (controller.actualAnalysis != null &&
                           context.mounted) {
                         Navigator.push(
@@ -86,6 +93,14 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
+                  SizedBox(height: 20),
+                  if (controller.errorMessage?.isNotEmpty ?? false) ...{
+                    Text(
+                      controller.errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  },
                 ],
               ),
             );

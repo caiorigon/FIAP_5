@@ -7,6 +7,7 @@ class MainButton extends StatelessWidget {
   final Color? iconColor;
   final Color? iconBgColor;
   final VoidCallback? onPressed;
+  final bool isEnabled;
 
   const MainButton({
     super.key,
@@ -14,6 +15,7 @@ class MainButton extends StatelessWidget {
     required this.description,
     required this.icon,
     required this.onPressed,
+    required this.isEnabled,
     this.iconColor,
     this.iconBgColor,
   });
@@ -21,13 +23,14 @@ class MainButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onPressed,
+      onTap: isEnabled ? onPressed : null,
       splashColor: Colors.blueGrey[100],
       child: Material(
-        color: Colors.transparent,
+        color:isEnabled? Colors.transparent : Colors.grey[200],
         child: Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           elevation: 1,
+          color: isEnabled? Colors.white : Colors.grey[200],
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(

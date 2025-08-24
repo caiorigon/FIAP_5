@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class MainTitle extends StatelessWidget {
-  const MainTitle({super.key});
+  final String title;
+  final String subtitle;
+  const MainTitle({super.key, required this.title, this.subtitle = ""});
 
   @override
   Widget build(BuildContext context) {
@@ -18,18 +20,23 @@ class MainTitle extends StatelessWidget {
             child: Icon(Icons.security, color: Colors.blueGrey, size: 32),
           ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Archalyzer",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Cloud Security Threat Assesment",
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            ),
-          ],
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                subtitle,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+            ],
+          ),
         ),
       ],
     );

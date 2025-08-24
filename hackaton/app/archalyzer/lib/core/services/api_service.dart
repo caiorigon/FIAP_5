@@ -29,8 +29,9 @@ class ApiService {
       // and the URL for the analyzed image.
       final responseBody = json.decode(response.body);
 
-      print('Backend Responded');
-      return AnalysisResult.fromJson(responseBody);
+      var analisys = AnalysisResult.fromJson(responseBody);
+      analisys.originalImage = imageFile;
+      return analisys;
     } else {
       throw Exception(
         "Failed to analyze diagram. Status code: ${response.statusCode}, Body: ${response.body}",

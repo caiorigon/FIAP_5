@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:archalyzer/app/models/threat_level.dart';
 import 'package:uuid/uuid.dart';
@@ -12,8 +13,8 @@ class AnalysisResult {
   final String title;
   final String cloud;
   final String description;
-  final String? originalImagePath; // Local path to the user's image
-  final String? analyzedImagePath; // Local path to the image from the backend
+  File? originalImage; // Local path to the user's image
+  final String? analyzedImage; // Local path to the image from the backend
   final DateTime createdAt;
   final List<AnalyzedComponent>? components;
 
@@ -22,8 +23,8 @@ class AnalysisResult {
     required this.title,
     required this.cloud,
     required this.description,
-    required this.originalImagePath,
-    required this.analyzedImagePath,
+    this.originalImage,
+    this.analyzedImage,
     required this.createdAt,
     required this.components,
   });
@@ -33,8 +34,8 @@ class AnalysisResult {
     title: json["title"],
     cloud: json["cloud"],
     description: json["description"],
-    originalImagePath: json["originalImagePath"],
-    analyzedImagePath: json["analyzedImagePath"],
+    originalImage: json["originalImage"],
+    analyzedImage: json["analyzedImage"],
     createdAt: json["createdAt"] != null
         ? DateTime.parse(json["createdAt"])
         : DateTime.now(),
@@ -51,8 +52,8 @@ class AnalysisResult {
     "id": id,
     "title": title,
     "description": description,
-    "originalImagePath": originalImagePath,
-    "analyzedImagePath": analyzedImagePath,
+    "originalImage": originalImage,
+    "analyzedImage": analyzedImage,
     "createdAt": createdAt.toIso8601String(),
     "components": components != null
         ? List<dynamic>.from(components!.map((x) => x.toJson()))
