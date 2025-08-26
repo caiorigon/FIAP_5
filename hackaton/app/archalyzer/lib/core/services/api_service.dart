@@ -1,41 +1,46 @@
-import 'dart:convert';
 import 'dart:io';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-
-import '../../app/models/analysis_result.dart'; // Your model
+import 'package:dio/dio.dart';
+import '../../app/models/analysis_result.dart';
 
 class ApiService {
-  // Replace with your actual Cloud Run URL
-  final _baseUri = dotenv.env['BASE_URI'];
-  final authToken = dotenv.env['AUTH_TOKEN'];
+  final Dio dio;
 
-  // We provide the AuthService when we create an ApiService
-  ApiService();
+  ApiService({required this.dio});
 
   Future<AnalysisResult> analyzeDiagram(File imageFile) async {
-    final uri = Uri.parse("$_baseUri/analyze-diagram");
-    final request = http.MultipartRequest("POST", uri)
-      ..headers['Authorization'] = 'Bearer $authToken'
-      ..files.add(await http.MultipartFile.fromPath('image', imageFile.path))
-      ..fields['prompt'] = "Find security issues in this diagram image.";
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode == 200) {
-      // The backend should return the JSON for the analysis
-      // and the URL for the analyzed image.
-      final responseBody = json.decode(response.body);
-
-      var analisys = AnalysisResult.fromJson(responseBody);
-      analisys.originalImage = imageFile;
-      return analisys;
-    } else {
-      throw Exception(
-        "Failed to analyze diagram. Status code: ${response.statusCode}, Body: ${response.body}",
+    try {
+      MultipartFile multipartFile = await MultipartFile.fromFile(
+        imageFile.path,
       );
+      FormData formData = FormData.fromMap({'image': multipartFile});
+
+      final response = await dio.post('/analyze-diagram', data: formData);
+
+      if (response.statusCode == 200) {
+        // The backend should return the JSON for the analysis
+        // and the URL for the analyzed image.
+
+        var analisys = AnalysisResult.fromJson(response.data);
+        analisys.originalImage = imageFile;
+        return analisys;
+      } else {
+        if (response.statusCode == 400) {
+          throw Exception(response.data);
+        } else {
+          throw Exception(
+            "Failed to analyze diagram. Status code: ${response.statusCode}, Body: ${response.data}",
+          );
+        }
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        throw Exception(
+          e.response?.data?['detail'] ?? "Error analyzing the image",
+        );
+      }
+      throw Exception("Error analyzing the image: ${e.message}");
+    } catch (e) {
+      throw Exception("Error uploading the image: $e");
     }
   }
 }

@@ -20,7 +20,9 @@ dependencies:
   intl: ^0.20.2
   uuid: ^3.0.7
   flutter_dotenv: ^5.0.2
-
+  dio: ^5.9.0
+  font_awesome_flutter: ^10.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

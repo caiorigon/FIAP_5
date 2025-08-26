@@ -1,4 +1,4 @@
-enum ThreatLevel { high, medium, low, unknown }
+enum ThreatLevel { high, medium, low, none, unknown }
 
 ThreatLevel threatLevelFromString(String value) {
   switch (value.toLowerCase()) {
@@ -8,6 +8,8 @@ ThreatLevel threatLevelFromString(String value) {
       return ThreatLevel.medium;
     case 'low':
       return ThreatLevel.low;
+    case 'none':
+      return ThreatLevel.none;
     default:
       return ThreatLevel.unknown;
   }
@@ -21,7 +23,13 @@ String threatLevelToString(ThreatLevel level) {
       return 'Medium';
     case ThreatLevel.low:
       return 'Low';
+    case ThreatLevel.none:
+      return 'none';
     default:
       return 'Unknown';
   }
+}
+
+bool hasThreat(ThreatLevel level) {
+  return level != ThreatLevel.none && level != ThreatLevel.unknown;
 }

@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 
 import '../app/controllers/analysis_controller.dart';
@@ -13,8 +15,13 @@ void setupLocator() {
   // instance is provided every time.
   locator.registerLazySingleton(() => AuthService());
 
+  // --- DIO ---
+  final dio = Dio();
+  dio.options.baseUrl = dotenv.env['BASE_URI'] ?? 'http://localhost:8000';
+  final authToken = dotenv.env['AUTH_TOKEN'] ?? "";
+  dio.options.headers = {'Authorization': 'Bearer $authToken'};
   // The ApiService depends on AuthService. GetIt will resolve this for you.
-  locator.registerLazySingleton(() => ApiService());
+  locator.registerLazySingleton(() => ApiService(dio: dio));
 
   // --- CONTROLLERS / NOTIFIERS ---
   // Register controllers as a 'factory'. This means a new instance

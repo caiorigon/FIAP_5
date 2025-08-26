@@ -1,7 +1,7 @@
 import 'package:archalyzer/app/models/threat_level.dart';
-
 import '../../models/analysis_result.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExpandableComponentWidget extends StatefulWidget {
   final AnalyzedComponent component;
@@ -14,8 +14,10 @@ class ExpandableComponentWidget extends StatefulWidget {
 
 MaterialColor getThreatLevelColor(ThreatLevel level) {
   switch (level) {
-    case ThreatLevel.low:
+    case ThreatLevel.none:
       return Colors.green;
+    case ThreatLevel.low:
+      return Colors.blue;
     case ThreatLevel.medium:
       return Colors.orange;
     case ThreatLevel.high:
@@ -25,102 +27,184 @@ MaterialColor getThreatLevelColor(ThreatLevel level) {
   }
 }
 
+IconData getThreatLevelIcon(ThreatLevel level) {
+  switch (level) {
+    case ThreatLevel.none:
+      return FontAwesomeIcons.check;
+    case ThreatLevel.low:
+      return FontAwesomeIcons.circleCheck;
+    case ThreatLevel.medium:
+      return FontAwesomeIcons.circleInfo;
+    case ThreatLevel.high:
+      return FontAwesomeIcons.triangleExclamation;
+    default:
+      return FontAwesomeIcons.circleQuestion;
+  }
+}
+
 class _ExpandableComponentWidgetState extends State<ExpandableComponentWidget> {
-  bool _expanded = false;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: _expanded ? 2 : 0,
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(
-              Icons.warning,
-              color: getThreatLevelColor(widget.component.threat.threatLevel),
-              size: 24,
-            ),
-            title: Text(
-              widget.component.componentName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            trailing: Icon(
-              _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-              color: Colors.grey[700],
-            ),
-            onTap: () {
-              setState(() {
-                _expanded = !_expanded;
-              });
-            },
-          ),
-          if (_expanded)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: [
-                        TextSpan(
-                          text: 'Threat Level: ',
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        TextSpan(
-                          text: threatLevelToString(
+      elevation: 1.0,
+      child: InkWell(
+        onTap: hasThreat(widget.component.threat.threatLevel)
+            ? () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                });
+              }
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: getThreatLevelColor(
+                          widget.component.threat.threatLevel,
+                        ).shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          width: .5,
+                          color: getThreatLevelColor(
                             widget.component.threat.threatLevel,
-                          ),
-                          style: TextStyle(
-                            color: getThreatLevelColor(
-                              widget.component.threat.threatLevel,
+                          ).shade300,
+                        ),
+                      ),
+                      child: Icon(
+                        color: getThreatLevelColor(
+                          widget.component.threat.threatLevel,
+                        ),
+                        getThreatLevelIcon(widget.component.threat.threatLevel),
+                        size: 20,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Flexible(
+                      flex: 4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.component.componentName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
                             ),
                           ),
-                        ),
-                      ],
+                          Text(
+                            widget.component.description ??
+                                "Description not provided",
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: [
-                        TextSpan(
-                          text: 'Possible Threat: ',
-                          style: TextStyle(fontWeight: FontWeight.w500),
+                    Expanded(child: SizedBox.shrink()),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: getThreatLevelColor(
+                          widget.component.threat.threatLevel,
+                        ).shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          width: .5,
+                          color: getThreatLevelColor(
+                            widget.component.threat.threatLevel,
+                          ).shade300,
                         ),
-                        TextSpan(text: widget.component.threat.description),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: [
-                        TextSpan(
-                          text: 'Mitigation: ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.green,
+                      ),
+                      child: Text(
+                        threatLevelToString(
+                          widget.component.threat.threatLevel,
+                        ),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10,
+                          color: getThreatLevelColor(
+                            widget.component.threat.threatLevel,
                           ),
                         ),
-                        TextSpan(
-                          text: widget.component.threat.possibleMitigation,
-                          style: TextStyle(),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    if (hasThreat(widget.component.threat.threatLevel))
+                      Icon(
+                        _isExpanded ? Icons.expand_less : Icons.expand_more,
+                        size: 30,
+                      ),
+                  ],
+                ),
+                AnimatedCrossFade(
+                  firstChild: SizedBox.shrink(),
+                  secondChild: Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 12),
+                        Divider(height: .5),
+                        SizedBox(height: 8),
+                        Text(
+                          "Threat Description",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          widget.component.threat.description ?? "",
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          "Pssible Mitigation",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          widget.component.threat.possibleMitigation ?? "",
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                  crossFadeState: _isExpanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: Duration(milliseconds: 200),
+                ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }

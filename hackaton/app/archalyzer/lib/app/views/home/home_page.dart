@@ -1,5 +1,6 @@
 import 'package:archalyzer/app/controllers/analysis_controller.dart';
 import 'package:archalyzer/app/views/analysis_detail/analysis_detail_page.dart';
+import 'package:archalyzer/app/views/home/loading_dialog.dart';
 import 'package:archalyzer/app/views/home/main_button.dart';
 import 'package:archalyzer/app/views/home/main_title.dart';
 import 'package:archalyzer/app/views/home/past_analyses_button.dart';
@@ -77,19 +78,20 @@ class _HomePageState extends State<HomePage> {
                     iconColor: Colors.green[800],
                     iconBgColor: Colors.green[50],
                     onPressed: () async {
-                      // LoadingDialog.show(context);
+                      LoadingDialog.show(context);
                       await analysisController.createNewAnalysis(
                         fromCamera: false,
                       );
-                      // LoadingDialog.hide(context);
-                      if (controller.actualAnalysis != null &&
-                          context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AnalysisDetailPage(),
-                          ),
-                        );
+                      if (context.mounted) {
+                        LoadingDialog.hide(context);
+                        if (controller.actualAnalysis != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AnalysisDetailPage(),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
