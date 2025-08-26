@@ -14,6 +14,7 @@ client = OpenAI()
 #     api_key=os.environ.get("GOOGLE_API_KEY"),
 #     base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
 # )
+
 app = FastAPI()
 
 security = HTTPBearer()
@@ -42,26 +43,35 @@ async def analyze_diagram(
         image_bytes = await image.read()
 
         prompt = """
-analyze this cloud software architecture diagram and identify what is it doing, what cloud it is in and the main components of this image.
+analyze this cloud software architecture diagram and identify what is it doing, what cloud it is in.
 Make a full STRIDE analysis of the architecture, identifying potential security threats.
-A list of main components in the architecture, with the coordinates of the bounding box of the components in the image and the threats: A list of potential security threats identified in the architecture, with the description, threat_level, and possible mitigation.
+Make a list of all the main components in the architecture, with its name, short description, and the highest identified threat.
+The threat is a potential STRIDE security threat identified in the architecture, with the description of the threat, threat_level, and possible mitigation.
+If the component doesn`t have a threat, return the component with the empty threat.
 
-Return ONLY a valid JSON object with the following structure and nothing else:
+Return ONLY a valid JSON object with the following structure OR a valid JSON containing an error message:
+Valid JSON structure:
 {
   "title": "Title of the architecture diagram",
   "cloud": "Cloud provider (e.g., AWS, Azure, GCP)",
   "description": "description of the architecture",
-  "components": [
+  "components": [ "list of main components in the architecture, with the following structure:"
     {
       "name": "Name of the cloud component",
-      "threat": "the most dangerous threats identified in the architecture, with the following structure:"
+      "description": "Very short description of what this components is or do
+      "threat": "the most dangerous threat identified in the component, with the following structure:"
         {
-          "description": "Description of the threat",
-          "threat_level": "High/Medium/Low",
-          "possible_mitigation": "Description of the possible mitigation proposed"
+          "description": "Description of the threat or empty if none",
+          "threat_level": "High/Medium/Low/none",
+          "possible_mitigation": "Description of the possible mitigation proposed or empty if none"
         }
     }
   ]
+}
+
+Error JSON structure:
+{
+    "error": "Description of the error"
 }
 """
         img = Image.open(io.BytesIO(image_bytes))
@@ -94,19 +104,27 @@ Return ONLY a valid JSON object with the following structure and nothing else:
         )
 
         content = response.choices[0].message.content
-        try:
-            result_json = json.loads(content)  # type: ignore
 
-            # url = edit_image_openai(image_bytes, result_json["title"])
-            # result_json["image_url"] = url
+        result_json = json.loads(content)  # type: ignore
 
-            # edit_image_gemini(base64_image)
+        # url = edit_image_openai(image_bytes, result_json["title"])
+        # result_json["image_url"] = url
 
-            return result_json
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"JSON parse error: {str(e)}")
+        # edit_image_gemini(base64_image)
+
+        if "error" in result_json:
+            print("error")
+            raise HTTPException(status_code=400, detail=result_json["error"])
+
+        return result_json
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print("exception")
+        if isinstance(e, HTTPException):
+            print("http exception")
+            raise e
+        else:
+            print("other exception")
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 def edit_image_openai(image_bytes, components):
