@@ -3,9 +3,6 @@ import 'package:archalyzer/app/views/analysis_detail/analysis_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-// TODO: Create the AnalysisDetailScreen file
-// import 'analysis_detail_screen.dart';
-
 class AnalysisListPage extends StatelessWidget {
   const AnalysisListPage({super.key});
 

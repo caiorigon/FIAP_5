@@ -55,17 +55,20 @@ class _HomePageState extends State<HomePage> {
                     iconColor: Colors.blue[800],
                     iconBgColor: Colors.blue[50],
                     onPressed: () async {
+                      LoadingDialog.show(context);
                       await analysisController.createNewAnalysis(
                         fromCamera: true,
                       );
-                      if (controller.actualAnalysis != null &&
-                          context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AnalysisDetailPage(),
-                          ),
-                        );
+                      if (context.mounted) {
+                        LoadingDialog.hide(context);
+                        if (controller.actualAnalysis != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AnalysisDetailPage(),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
