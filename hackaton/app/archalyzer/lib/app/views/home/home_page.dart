@@ -55,7 +55,12 @@ class _HomePageState extends State<HomePage> {
                     iconColor: Colors.blue[800],
                     iconBgColor: Colors.blue[50],
                     onPressed: () async {
-                      LoadingDialog.show(context);
+                      LoadingDialog.show(
+                        context,
+                        title: "Analyzing Diagram",
+                        description:
+                            "Identifying threats and vulnerabilities...",
+                      );
                       await analysisController.createNewAnalysis(
                         fromCamera: true,
                       );
@@ -81,7 +86,12 @@ class _HomePageState extends State<HomePage> {
                     iconColor: Colors.green[800],
                     iconBgColor: Colors.green[50],
                     onPressed: () async {
-                      LoadingDialog.show(context);
+                      LoadingDialog.show(
+                        context,
+                        title: "Analyzing Diagram",
+                        description:
+                            "Identifying threats and vulnerabilities...",
+                      );
                       await analysisController.createNewAnalysis(
                         fromCamera: false,
                       );

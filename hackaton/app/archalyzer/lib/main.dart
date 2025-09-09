@@ -1,17 +1,13 @@
 import 'package:archalyzer/app/views/home/home_page.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'app/controllers/analysis_controller.dart';
-import 'core/service_locator.dart'; // <-- Import the locator
-import 'firebase_options.dart';
+import 'core/service_locator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   setupLocator();
 

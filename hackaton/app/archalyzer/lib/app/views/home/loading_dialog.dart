@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 class LoadingDialog {
   LoadingDialog._();
 
-  static show(BuildContext context) {
+  static show(
+    BuildContext context, {
+    required String title,
+    required String description,
+  }) {
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -11,7 +15,7 @@ class LoadingDialog {
         return Dialog(
           elevation: 0,
           backgroundColor: Colors.transparent,
-          child: _customDialog(context),
+          child: _customDialog(context, title: title, description: description),
         );
       },
     );
@@ -21,7 +25,11 @@ class LoadingDialog {
     Navigator.pop(context);
   }
 
-  static _customDialog(BuildContext context) {
+  static _customDialog(
+    BuildContext context, {
+    required String title,
+    required String description,
+  }) {
     return Center(
       child: Container(
         decoration: BoxDecoration(
@@ -51,7 +59,7 @@ class LoadingDialog {
               ),
               Padding(padding: EdgeInsets.only(top: 20)),
               Text(
-                "Analyzing Diagram",
+                title,
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
@@ -59,7 +67,7 @@ class LoadingDialog {
               ),
               SizedBox(height: 6),
               Text(
-                "Identifying threats and vulnerabilities...",
+                description,
                 style: TextStyle(fontWeight: FontWeight.normal),
               ),
             ],
