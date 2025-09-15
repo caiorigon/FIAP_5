@@ -88,11 +88,13 @@ class AnalyzedComponent {
 
 class Threat {
   final String? description;
+  final String? threatType;
   final ThreatLevel threatLevel;
   final String? possibleMitigation;
 
   Threat({
     required this.description,
+    required this.threatType,
     required this.threatLevel,
     required this.possibleMitigation,
   });
@@ -100,6 +102,7 @@ class Threat {
   factory Threat.fromJson(Map<String, dynamic> json) {
     return Threat(
       description: json['description'],
+      threatType: json['threat_type'],
       threatLevel: threatLevelFromString(json['threat_level'] ?? 'Unknown'),
       possibleMitigation: json['possible_mitigation'],
     );
@@ -107,6 +110,7 @@ class Threat {
 
   Map<String, dynamic> toJson() => {
     "description": description,
+    "threat_type": threatType,
     "threat_level": threatLevelToString(threatLevel),
     "possible_mitigation": possibleMitigation,
   };

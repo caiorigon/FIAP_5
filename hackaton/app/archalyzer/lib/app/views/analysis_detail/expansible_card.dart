@@ -81,10 +81,7 @@ class _ExpandableDescriptionCardState extends State<ExpandableDescriptionCard> {
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      secondChild: Text(
-                        widget.description,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
+                      secondChild: Text(widget.description),
                       crossFadeState: _isExpanded
                           ? CrossFadeState.showSecond
                           : CrossFadeState.showFirst,
