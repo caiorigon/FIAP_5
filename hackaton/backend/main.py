@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 import json
-from PIL import Image, ImageDraw
+from PIL import Image
 from openai import OpenAI
 import base64
 import io
